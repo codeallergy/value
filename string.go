@@ -28,7 +28,13 @@ type rawString []byte
 var uft8StringClass = reflect.TypeOf((*uft8String)(nil)).Elem()
 var rawStringClass = reflect.TypeOf((*rawString)(nil)).Elem()
 
+var EmptyString = uft8String("")
+
 func Utf8(val string) String {
+	return uft8String(val)
+}
+
+func Str(val string) String {
 	return uft8String(val)
 }
 

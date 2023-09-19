@@ -431,15 +431,15 @@ type Map interface {
 	/**
 		Gets value by the key
 
-	    return (value or nil, true) or (nil, false)
+	    return Value or Null
 	*/
 
-	Get(string) (Value, bool)
+	Get(string) Value
 
 	/**
 		Gets boolean value by the key
 
-	    return value or nil
+	    return Bool or False
 	*/
 
 	GetBool(string) Bool
@@ -447,7 +447,7 @@ type Map interface {
 	/**
 		Gets number value by the key
 
-	    return value or nil
+	    return Number or Zero
 	*/
 
 	GetNumber(string) Number
@@ -455,7 +455,7 @@ type Map interface {
 	/**
 	Gets string value by the key
 
-	return value or nil
+	return String or Str("")
 	*/
 
 	GetString(string) String

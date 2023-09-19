@@ -147,3 +147,9 @@ func ReadStream(r io.Reader, out chan<- Value) error {
 	return nil
 }
 
+func CopyOf(src []Value) []Value {
+	n := len(src)
+	dst := make([]Value, n)
+	copy(dst, src)
+	return dst
+}

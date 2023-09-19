@@ -222,50 +222,50 @@ func (t sparseListValue) GetAt(key int) Value {
 		return t[i].Key() >= key
 	})
 	if i == n {
-		return nil
+		return Null
 	} else if t[i].Key() == key {
 		return t[i].Value()
 	} else {
-		return nil
+		return Null
 	}
 }
 
 func (t sparseListValue) GetBoolAt(index int) Bool {
 	value := t.GetAt(index)
-	if value != nil {
+	if value != Null {
 		if value.Kind() == BOOL {
 			return value.(Bool)
 		}
 		return ParseBoolean(value.String())
 	}
-	return nil
+	return False
 }
 
 func (t sparseListValue) GetNumberAt(index int) Number {
 	value := t.GetAt(index)
-	if value != nil {
+	if value != Null {
 		if value.Kind() == NUMBER {
 			return value.(Number)
 		}
 		return ParseNumber(value.String())
 	}
-	return nil
+	return Zero
 }
 
 func (t sparseListValue) GetStringAt(index int) String {
 	value := t.GetAt(index)
-	if value != nil {
+	if value != Null {
 		if value.Kind() == STRING {
 			return value.(String)
 		}
 		return ParseString(value.String())
 	}
-	return nil
+	return EmptyString
 }
 
 func (t sparseListValue) GetListAt(index int) List {
 	value := t.GetAt(index)
-	if value != nil {
+	if value != Null {
 		switch value.Kind() {
 		case LIST:
 			return value.(List)
@@ -273,12 +273,12 @@ func (t sparseListValue) GetListAt(index int) List {
 			return SolidList(value.(Map).Values())
 		}
 	}
-	return nil
+	return EmptyList()
 }
 
 func (t sparseListValue) GetMapAt(index int) Map {
 	value := t.GetAt(index)
-	if value != nil {
+	if value != Null {
 		switch value.Kind() {
 		case LIST:
 			return SortedMap(value.(List).Entries(), false)
@@ -286,10 +286,13 @@ func (t sparseListValue) GetMapAt(index int) Map {
 			return value.(Map)
 		}
 	}
-	return nil
+	return EmptyMap()
 }
 
 func (t sparseListValue) Append(value Value) List {
+	if value == nil {
+		value = Null
+	}
 	n := len(t)
 	if n == 0 {
 		return t.append(n, Item(FirstIndexKey, value))
@@ -300,6 +303,9 @@ func (t sparseListValue) Append(value Value) List {
 }
 
 func (t sparseListValue) PutAt(key int, value Value) List {
+	if value == nil {
+		value = Null
+	}
 	n := len(t)
 	i := sort.Search(n, func(i int) bool {
 		return t[i].Key() >= key
@@ -314,6 +320,9 @@ func (t sparseListValue) PutAt(key int, value Value) List {
 }
 
 func (t sparseListValue) InsertAt(key int, value Value) List {
+	if value == nil {
+		value = Null
+	}
 	n := len(t)
 	i := sort.Search(n, func(i int) bool {
 		return t[i].Key() >= key
@@ -415,6 +424,12 @@ func (t sparseListValue) InsertAll(key int, list []Value) List {
 
 	if len(list) == 0 {
 		return t
+	}
+
+	for k := range list {
+		if list[k] == nil {
+			list[k] = Null
+		}
 	}
 
 	var slice []ListItem

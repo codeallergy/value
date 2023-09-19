@@ -16,7 +16,7 @@ import (
 
 func TestNilSortedMap(t *testing.T) {
 
-	b := val.NewMap()
+	b := val.EmptyMutableMap()
 	b = b.Put("null", val.Null)
 
 	data, err := val.Pack(b)
@@ -34,7 +34,7 @@ func TestNilSortedMap(t *testing.T) {
 
 func TestEmptySortedMap(t *testing.T) {
 
-	b := val.NewMap()
+	b := val.EmptyMutableMap()
 
 	require.Equal(t, val.MAP, b.Kind())
 	require.Equal(t, "value.sortedMapValue", b.Class().String())
@@ -47,7 +47,7 @@ func TestEmptySortedMap(t *testing.T) {
 
 func TestSortedMapPut(t *testing.T) {
 
-	b := val.NewMap()
+	b := val.EmptyMutableMap()
 
 	b = b.Put("name", val.Utf8("alex"))
 	b = b.Put("state", val.Utf8("CA"))
@@ -102,7 +102,7 @@ func TestSortedMapPut(t *testing.T) {
 
 func TestSortedMapMarshal(t *testing.T) {
 
-	b := val.NewMap()
+	b := val.EmptyMutableMap()
 	b = b.Put("k", val.Long(100))
 
 	j, _ := b.MarshalJSON()
@@ -111,7 +111,7 @@ func TestSortedMapMarshal(t *testing.T) {
 	bin, _ := b.MarshalBinary()
 	require.Equal(t, []byte{0x81, 0xa1, 0x6b, 0x64}, bin)
 
-	b = val.EmptyMap()
+	b = val.EmptyMutableMap()
 	b = b.Put("3", val.Boolean(true))
 
 	j, _ = b.MarshalJSON()
@@ -125,7 +125,7 @@ func TestSortedMapMarshal(t *testing.T) {
 
 func TestSortedMapPutLongNum(t *testing.T) {
 
-	b := val.NewMap()
+	b := val.EmptyMutableMap()
 
 	b = b.Put("12345678901234567890", val.Long(555))
 
@@ -144,9 +144,9 @@ func TestSortedMapPutLongNum(t *testing.T) {
 
 func TestSortedMapJson(t *testing.T) {
 
-	d := val.NewMap()
+	d := val.EmptyMutableMap()
 
-	c := val.NewMap()
+	c := val.EmptyMutableMap()
 	c = c.Put("5", val.Long(5))
 
 	d = d.Put("name", val.Utf8("name"))

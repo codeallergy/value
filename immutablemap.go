@@ -18,43 +18,37 @@ This is an immutable sorted Map implementation with deterministic serialization 
 Serializes in MessagePack as Map with string index
 */
 
-type immutableMapEntry struct {
-	key    string
-	value  Value
-}
-
 type immutableMapValue []MapEntry
+
 var immutableMapValueClass = reflect.TypeOf((*immutableMapValue)(nil)).Elem()
 
-func ImmutableEntry(key string, value Value) MapEntry {
-	return &immutableMapEntry {
-		key: key,
-		value: value,
-	}
+func EmptyImmutableMap() Map {
+	return immutableMapValue([]MapEntry{})
 }
 
-func ImmutableMap(entries []MapEntry, sortedEntries bool) Map {
+func ImmutableMapOf(src map[string]Value) Map {
+	entries := make([]MapEntry, len(src))
+	var i int
+	for key, value := range src {
+		entries[i] = ImmutableEntry(key, value)
+		i++
+	}
 	t := immutableMapValue(entries)
-	if !sortedEntries {
+	sort.Sort(t)
+	return t
+}
+
+func ImmutableMap(entries []MapEntry, sorted bool) Map {
+	t := immutableMapValue(entries)
+	if !sorted {
 		sort.Sort(t)
 	}
 	return t
 }
 
-func EmptyMap() Map {
-	return immutableMapValue([]MapEntry{})
-}
-
-func (t *immutableMapEntry) Key() string {
-	return t.key
-}
-
-func (t *immutableMapEntry) Value() Value {
-	return t.value
-}
-
-func (t *immutableMapEntry) Equal(e MapEntry) bool {
-	return t.key == e.Key() && Equal(t.value, e.Value())
+func ImmutableMapCopyOf(other Map) Map {
+	t := immutableMapValue(mapEntryCopyOf(other.Entries()))
+	return t
 }
 
 func (t immutableMapValue) HashMap() map[string]Value {
@@ -241,7 +235,7 @@ func (t immutableMapValue) GetList(key string) List {
 			return ImmutableList(value.(Map).Values())
 		}
 	}
-	return EmptyList()
+	return EmptyImmutableList()
 }
 
 func (t immutableMapValue) GetMap(key string) Map {
@@ -254,7 +248,7 @@ func (t immutableMapValue) GetMap(key string) Map {
 			return value.(Map)
 		}
 	}
-	return EmptyMap()
+	return EmptyImmutableMap()
 }
 
 func (t immutableMapValue) Insert(key string, value Value) Map {
@@ -266,9 +260,9 @@ func (t immutableMapValue) Insert(key string, value Value) Map {
 		return t[i].Key() >= key
 	})
 	if i == n {
-		return t.append(n, Entry(key, value))
+		return t.append(n, ImmutableEntry(key, value))
 	} else {
-		return t.insertAt(i, n, Entry(key, value))
+		return t.insertAt(i, n, ImmutableEntry(key, value))
 	}
 }
 
@@ -281,12 +275,16 @@ func (t immutableMapValue) Put(key string, value Value) Map {
 		return t[i].Key() >= key
 	})
 	if i == n {
-		return t.append(n, Entry(key, value))
+		return t.append(n, ImmutableEntry(key, value))
 	} else if t[i].Key() == key {
-		return t.replaceAt(i, n, Entry(key, value))
+		return t.replaceAt(i, n, ImmutableEntry(key, value))
 	} else {
-		return t.insertAt(i, n, Entry(key, value))
+		return t.insertAt(i, n, ImmutableEntry(key, value))
 	}
+}
+
+func (t immutableMapValue) Update(key string, updater Updater) bool {
+	return false
 }
 
 func (t immutableMapValue) Remove(key string) Map {
@@ -412,7 +410,7 @@ func (t immutableMapValue) DeleteAll(key string) Map {
 
 func (t immutableMapValue) appendSlice(n int, slice []MapEntry) Map {
 	if n == 0 {
-		return immutableMapValue(t.copyOf(slice))
+		return immutableMapValue(mapEntryCopyOf(slice))
 	} else {
 		dst := make([]MapEntry, n+len(slice))
 		copy(dst, t)
@@ -440,9 +438,9 @@ func (t immutableMapValue) insertSliceAt(i, n int, slice []MapEntry) Map {
 
 func (t immutableMapValue) removeSliceAt(i, cnt, n int) Map {
 	if i == 0 {
-		return immutableMapValue(t.copyOf(t[cnt:]))
+		return immutableMapValue(mapEntryCopyOf(t[cnt:]))
 	} else if i+cnt == n {
-		return immutableMapValue(t.copyOf(t[:i]))
+		return immutableMapValue(mapEntryCopyOf(t[:i]))
 	} else {
 		dst := make([]MapEntry, n-cnt)
 		copy(dst, t[:i])
@@ -451,9 +449,3 @@ func (t immutableMapValue) removeSliceAt(i, cnt, n int) Map {
 	}
 }
 
-func (t immutableMapValue) copyOf(src []MapEntry) []MapEntry {
-	n := len(src)
-	dst := make([]MapEntry, n)
-	copy(dst, src)
-	return dst
-}

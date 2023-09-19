@@ -14,7 +14,7 @@ import (
 
 func TestNilImmutableList(t *testing.T) {
 
-	b := val.EmptyList()
+	b := val.EmptyImmutableList()
 	b = b.Append(val.Null)
 
 	data, err := val.Pack(b)
@@ -32,7 +32,7 @@ func TestNilImmutableList(t *testing.T) {
 
 func TestEmptyImmutableList(t *testing.T) {
 
-	b := val.EmptyList()
+	b := val.EmptyImmutableList()
 
 	require.Equal(t, val.LIST, b.Kind())
 	require.Equal(t, "value.immutableListValue", b.Class().String())
@@ -45,7 +45,7 @@ func TestEmptyImmutableList(t *testing.T) {
 
 func TestImmutableListAppend(t *testing.T) {
 
-	b := val.EmptyList()
+	b := val.EmptyImmutableList()
 	b = b.Append(val.Long(123))
 
 	require.Equal(t, val.LIST, b.Kind())
@@ -56,7 +56,7 @@ func TestImmutableListAppend(t *testing.T) {
 
 func TestImmutableListPutAt(t *testing.T) {
 
-	b := val.EmptyList()
+	b := val.EmptyImmutableList()
 
 	b = b.PutAt(7, val.Long(777))
 	b = b.PutAt(9, val.Long(999))
@@ -89,7 +89,7 @@ func TestImmutableListPutAt(t *testing.T) {
 
 func TestImmutableListMarshal(t *testing.T) {
 
-	b := val.EmptyList()
+	b := val.EmptyImmutableList()
 	b = b.Append(val.Long(100))
 
 	j, _ := b.MarshalJSON()
@@ -98,7 +98,7 @@ func TestImmutableListMarshal(t *testing.T) {
 	bin, _ := b.MarshalBinary()
 	require.Equal(t, []byte{0x91, 0x64}, bin)
 
-	b = val.EmptyList()
+	b = val.EmptyImmutableList()
 	b = b.PutAt(3, val.Boolean(true))
 
 	j, _ = b.MarshalJSON()
@@ -112,7 +112,7 @@ func TestImmutableListMarshal(t *testing.T) {
 
 func TestImmutableListJson(t *testing.T) {
 
-	b := val.EmptyList()
+	b := val.EmptyImmutableList()
 
 	b = b.Append(val.Boolean(true))
 	b = b.Append(val.Long(123))

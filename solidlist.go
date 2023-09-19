@@ -18,13 +18,14 @@ import (
 */
 
 type solidListValue []Value
+
 var solidListValueClass = reflect.TypeOf((*solidListValue)(nil)).Elem()
 
-func NewList() List {
+func EmptyMutableList() List {
 	return solidListValue([]Value{})
 }
 
-func SolidList(list []Value) List {
+func MutableList(list []Value) List {
 	return solidListValue(list)
 }
 
@@ -57,7 +58,7 @@ func (t solidListValue) String() string {
 func (t solidListValue) Items() []ListItem {
 	var items []ListItem
 	for key, value := range t {
-		items = append(items, Item(key, value))
+		items = append(items, ImmutableItem(key, value))
 	}
 	return items
 }
@@ -65,7 +66,7 @@ func (t solidListValue) Items() []ListItem {
 func (t solidListValue) Entries() []MapEntry {
 	var entries []MapEntry
 	for key, value := range t {
-		entries = append(entries, Entry(strconv.Itoa(key), value))
+		entries = append(entries, ImmutableEntry(strconv.Itoa(key), value))
 	}
 	return entries
 }
@@ -182,10 +183,10 @@ func (t solidListValue) GetListAt(index int) List {
 		case LIST:
 			return value.(List)
 		case MAP:
-			return SolidList(value.(Map).Values())
+			return MutableList(value.(Map).Values())
 		}
 	}
-	return EmptyList()
+	return EmptyImmutableList()
 }
 
 func (t solidListValue) GetMapAt(index int) Map {
@@ -198,7 +199,7 @@ func (t solidListValue) GetMapAt(index int) Map {
 			return value.(Map)
 		}
 	}
-	return EmptyMap()
+	return EmptyImmutableMap()
 }
 
 func (t solidListValue) Append(val Value) List {
@@ -221,6 +222,19 @@ func (t solidListValue) PutAt(i int, val Value) List {
 		}
 	}
 	return t
+}
+
+func (t solidListValue) UpdateAt(i int, updater Updater) bool {
+	n := len(t)
+	if i >= 0 && i < n {
+		newValue := updater.Update(t[i])
+		if newValue == nil {
+			newValue = Null
+		}
+		t[i] = newValue
+		return true
+	}
+	return false
 }
 
 func (t solidListValue) InsertAt(i int, val Value) List {

@@ -53,8 +53,8 @@ func TestStruct(t *testing.T) {
 		BoolField: value.True,
 		NumberField: value.Long(123),
 		StringField: value.Utf8("test"),
-		ListField: value.EmptyList(),
-		MapField: value.EmptyMap(),
+		ListField: value.EmptyMutableList(),
+		MapField: value.EmptyMutableMap(),
 		InnerField: &Inner {
 			String: value.Utf8("inner"),
 		},
@@ -119,8 +119,8 @@ func TestRepStruct(t *testing.T) {
 		BoolField: []value.Bool {value.True, value.False},
 		NumberField: []value.Number { value.Long(123), value.Long(456) },
 		StringField: []value.String { value.Utf8("test"), value.Raw([]byte("bytes"), false) },
-		ListField: []value.List { value.EmptyList(), value.EmptyList() },
-		MapField: []value.Map { value.EmptyMap(), value.EmptyMap() },
+		ListField: []value.List { value.EmptyMutableList(), value.EmptyMutableList() },
+		MapField: []value.Map { value.EmptyMutableMap(), value.EmptyMutableMap() },
 		InnerField: []*Inner { inner, inner },
 	}
 
@@ -157,8 +157,8 @@ func TestArrayStruct(t *testing.T) {
 		BoolField: []value.Bool {value.True, value.False},
 		NumberField: []value.Number { value.Long(123), value.Long(456) },
 		StringField: []value.String { value.Utf8("test"), value.Raw([]byte("bytes"), false) },
-		ListField: []value.List { value.EmptyList(), value.EmptyList() },
-		MapField: []value.Map { value.EmptyMap(), value.EmptyMap() },
+		ListField: []value.List { value.EmptyMutableList(), value.EmptyMutableList() },
+		MapField: []value.Map { value.EmptyMutableMap(), value.EmptyMutableMap() },
 		InnerField: []*Inner { inner, inner },
 	}
 

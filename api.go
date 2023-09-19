@@ -100,6 +100,17 @@ type Value interface {
 	Equal(Value) bool
 }
 
+
+type Updater interface {
+
+	/**
+	In-pace updater of the value
+	 */
+
+	Update(old Value) (new Value)
+
+}
+
 /**
 Boolean interface
 
@@ -259,25 +270,66 @@ type String interface {
 type Extension interface {
 	Value
 
+	/**
+	Gets serialized extension in MsgPack
+	 */
+
 	Native() []byte
 }
 
 type ListItem interface {
 
-	/*
-		Index in the array where item is located
+	/**
+	Index in the array where item is located
 	*/
 	Key() int
 
+	/**
+	Value of the cell
+	 */
+
 	Value() Value
+
+	/**
+	Updates value in-place
+
+	Returns true if value was updated
+	*/
+
+	Update(Updater) bool
+
+	/**
+	Checks if key and value are the same
+	*/
 
 	Equal(ListItem) bool
 }
 
 type MapEntry interface {
+
+	/**
+	Key of the map always a string
+	 */
+
 	Key() string
 
+	/**
+	Value if the map can be any object with Value interface
+	 */
+
 	Value() Value
+
+	/**
+	Updates value in-place
+
+	Returns true if value was updated
+	*/
+
+	Update(Updater) bool
+
+	/**
+	Checks if key and value are the same
+	 */
 
 	Equal(MapEntry) bool
 }
@@ -366,6 +418,14 @@ type List interface {
 	*/
 
 	PutAt(int, Value) List
+
+	/**
+	Updates value to the list at position i, does not work in immutable maps
+
+	Returns true if value was updated
+	*/
+
+	UpdateAt(int, Updater) bool
 
 	/**
 	Adds value to the list at position i by shifting to left
@@ -487,6 +547,14 @@ type Map interface {
 	*/
 
 	Put(key string, value Value) Map
+
+	/**
+	Updates value in place, does not work for immutable maps
+
+	Returns true if value was updated
+	*/
+
+	Update(key string, updater Updater) bool
 
 	/**
 	Removes value by the key

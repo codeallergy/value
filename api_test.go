@@ -117,14 +117,14 @@ func testCreateMap() val.Map {
 	a = a.InsertAt(1, val.Utf8("text"))
 	a = a.InsertAt(5, val.Raw([]byte{0, 1, 2}, false))
 
-	b := val.EmptyList()
+	b := val.EmptyMutableList()
 	b = b.Append(val.Boolean(true))
 	b = b.Append(val.Long(123))
 	b = b.Append(val.Double(-12.34))
 	b = b.Append(val.Utf8("text"))
 	b = b.Append(val.Raw([]byte{0, 1, 2}, false))
 
-	c := val.EmptyMap()
+	c := val.EmptyMutableMap()
 	c = c.Put("5", val.Long(5))
 
 	c = c.Put("name", val.Utf8("name"))

@@ -16,7 +16,7 @@ import (
 
 func TestNilImmutableMap(t *testing.T) {
 
-	b := val.EmptyMap()
+	b := val.EmptyImmutableMap()
 	b = b.Put("null", val.Null)
 
 	data, err := val.Pack(b)
@@ -34,7 +34,7 @@ func TestNilImmutableMap(t *testing.T) {
 
 func TestEmptyImmutableMap(t *testing.T) {
 
-	b := val.EmptyMap()
+	b := val.EmptyImmutableMap()
 
 	require.Equal(t, val.MAP, b.Kind())
 	require.Equal(t, "value.immutableMapValue", b.Class().String())
@@ -47,7 +47,7 @@ func TestEmptyImmutableMap(t *testing.T) {
 
 func TestImmutableMapPut(t *testing.T) {
 
-	b := val.EmptyMap()
+	b := val.EmptyImmutableMap()
 
 	b = b.Put("name", val.Utf8("alex"))
 	b = b.Put("state", val.Utf8("CA"))
@@ -102,7 +102,7 @@ func TestImmutableMapPut(t *testing.T) {
 
 func TestImmutableMapMarshal(t *testing.T) {
 
-	b := val.EmptyMap()
+	b := val.EmptyImmutableMap()
 	b = b.Put("k", val.Long(100))
 
 	j, _ := b.MarshalJSON()
@@ -111,7 +111,7 @@ func TestImmutableMapMarshal(t *testing.T) {
 	bin, _ := b.MarshalBinary()
 	require.Equal(t, []byte{0x81, 0xa1, 0x6b, 0x64}, bin)
 
-	b = val.EmptyMap()
+	b = val.EmptyImmutableMap()
 	b = b.Put("3", val.Boolean(true))
 
 	j, _ = b.MarshalJSON()
@@ -125,7 +125,7 @@ func TestImmutableMapMarshal(t *testing.T) {
 
 func TestImmutableMapPutLongNum(t *testing.T) {
 
-	b := val.EmptyMap()
+	b := val.EmptyImmutableMap()
 
 	b = b.Put("12345678901234567890", val.Long(555))
 
@@ -144,9 +144,9 @@ func TestImmutableMapPutLongNum(t *testing.T) {
 
 func TestImmutableMapJson(t *testing.T) {
 
-	d := val.EmptyMap()
+	d := val.EmptyImmutableMap()
 
-	c := val.EmptyMap()
+	c := val.EmptyImmutableMap()
 	c = c.Put("5", val.Long(5))
 
 	d = d.Put("name", val.Utf8("name"))
@@ -162,7 +162,7 @@ func TestImmutableMapJson(t *testing.T) {
 
 
 func newHandshakeRequest(clientId int64) val.Map {
-	return val.EmptyMap().
+	return val.EmptyImmutableMap().
 		Put("m", val.Utf8("vRPC")).
 		Put("v", val.Double(1.0)).
 		Put("t", val.Long(1)).

@@ -12,10 +12,16 @@ import (
 	"strings"
 )
 
+type immutableListEntry struct {
+	key    string
+	value  Value
+}
+
 type immutableListValue []Value
+
 var immutableListValueClass = reflect.TypeOf((*immutableListValue)(nil)).Elem()
 
-func EmptyList() List {
+func EmptyImmutableList() List {
 	return immutableListValue([]Value{})
 }
 
@@ -44,7 +50,7 @@ func (t immutableListValue) String() string {
 func (t immutableListValue) Items() []ListItem {
 	var items []ListItem
 	for key, value := range t {
-		items = append(items, Item(key, value))
+		items = append(items, ImmutableItem(key, value))
 	}
 	return items
 }
@@ -52,7 +58,7 @@ func (t immutableListValue) Items() []ListItem {
 func (t immutableListValue) Entries() []MapEntry {
 	var entries []MapEntry
 	for key, value := range t {
-		entries = append(entries, Entry(strconv.Itoa(key), value))
+		entries = append(entries, ImmutableEntry(strconv.Itoa(key), value))
 	}
 	return entries
 }
@@ -172,7 +178,7 @@ func (t immutableListValue) GetListAt(index int) List {
 			return ImmutableList(value.(Map).Values())
 		}
 	}
-	return EmptyList()
+	return EmptyImmutableList()
 }
 
 func (t immutableListValue) GetMapAt(index int) Map {
@@ -185,7 +191,7 @@ func (t immutableListValue) GetMapAt(index int) Map {
 			return value.(Map)
 		}
 	}
-	return EmptyMap()
+	return EmptyImmutableMap()
 }
 
 func (t immutableListValue) Append(val Value) List {
@@ -208,6 +214,10 @@ func (t immutableListValue) PutAt(i int, val Value) List {
 		}
 	}
 	return t
+}
+
+func (t immutableListValue) UpdateAt(int, Updater) bool {
+	return false
 }
 
 func (t immutableListValue) InsertAt(i int, val Value) List {

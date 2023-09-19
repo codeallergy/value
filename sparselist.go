@@ -23,32 +23,12 @@ import (
 
 var FirstIndexKey = 0
 
-type sparseListItem struct {
-	key    int  // should be unsigned, but easy to maintain 'int'
-	value  Value
-}
-
+/**
+Keeps this array in sorted state
+ */
 type sparseListValue []ListItem
+
 var sparseListValueClass = reflect.TypeOf((*sparseListValue)(nil)).Elem()
-
-type sortableValues []ListItem
-
-func (t sortableValues) Len() int {
-	return len(t)
-}
-
-func (t sortableValues) Swap(i, j int) {
-	t[i], t[j] = t[j], t[i]
-}
-
-func (t sortableValues) Less(i, j int) bool {
-	return t[i].Key() < t[j].Key()
-}
-
-
-func Item(key int, value Value) ListItem {
-	return &sparseListItem{key, value}
-}
 
 var emptySparseList = sparseListValue([]ListItem{})
 
@@ -60,34 +40,18 @@ func SparseListOf(list []Value) List {
 	var items []ListItem
 	for key, val := range list {
 		if val != nil {
-			items = append(items, Item(key, val))
+			items = append(items, MutableItem(key, val))
 		}
 	}
-	sort.Sort(sortableValues(items))
+	sort.Sort(sortableItems(items))
 	return sparseListValue(items)
 }
 
-func SparseList(items []ListItem, sortedItems bool) List {
-	if !sortedItems {
-		sort.Sort(sortableValues(items))
+func SparseList(items []ListItem, sorted bool) List {
+	if !sorted {
+		sort.Sort(sortableItems(items))
 	}
 	return sparseListValue(items)
-}
-
-func SortedSparseList(items []ListItem) List {
-	return sparseListValue(items)
-}
-
-func (t *sparseListItem) Key() int {
-	return t.key
-}
-
-func (t *sparseListItem) Value() Value {
-	return t.value
-}
-
-func (t *sparseListItem) Equal(e ListItem) bool {
-	return t.key == e.Key() && Equal(t.value, e.Value())
 }
 
 func (t sparseListValue) Kind() Kind {
@@ -115,7 +79,7 @@ func (t sparseListValue) Items() []ListItem {
 func (t sparseListValue) Entries() []MapEntry {
 	var entries []MapEntry
 	for _, item := range t {
-		entries = append(entries, Entry(strconv.Itoa(item.Key()), item.Value()))
+		entries = append(entries, MutableEntry(strconv.Itoa(item.Key()), item.Value()))
 	}
 	return entries
 }
@@ -270,10 +234,10 @@ func (t sparseListValue) GetListAt(index int) List {
 		case LIST:
 			return value.(List)
 		case MAP:
-			return SolidList(value.(Map).Values())
+			return MutableList(value.(Map).Values())
 		}
 	}
-	return EmptyList()
+	return EmptyImmutableList()
 }
 
 func (t sparseListValue) GetMapAt(index int) Map {
@@ -286,7 +250,7 @@ func (t sparseListValue) GetMapAt(index int) Map {
 			return value.(Map)
 		}
 	}
-	return EmptyMap()
+	return EmptyImmutableMap()
 }
 
 func (t sparseListValue) Append(value Value) List {
@@ -295,10 +259,10 @@ func (t sparseListValue) Append(value Value) List {
 	}
 	n := len(t)
 	if n == 0 {
-		return t.append(n, Item(FirstIndexKey, value))
+		return t.append(n, MutableItem(FirstIndexKey, value))
 	} else {
 		maxKey := t[n-1].Key()
-		return t.append(n, Item(maxKey+1, value))
+		return t.append(n, MutableItem(maxKey+1, value))
 	}
 }
 
@@ -311,11 +275,23 @@ func (t sparseListValue) PutAt(key int, value Value) List {
 		return t[i].Key() >= key
 	})
 	if i == n {
-		return t.append(n, Item(key, value))
+		return t.append(n, MutableItem(key, value))
 	} else if t[i].Key() == key {
-		return t.replaceAt(i, n, Item(key, value))
+		return t.replaceAt(i, n, MutableItem(key, value))
 	} else {
-		return t.insertAt(i, n, Item(key, value))
+		return t.insertAt(i, n, MutableItem(key, value))
+	}
+}
+
+func (t sparseListValue) UpdateAt(key int, updater Updater) bool {
+	n := len(t)
+	i := sort.Search(n, func(i int) bool {
+		return t[i].Key() >= key
+	})
+	if i >= 0 && i < n && t[i].Key() == key {
+		return t[i].Update(updater)
+	} else {
+		return false
 	}
 }
 
@@ -328,9 +304,9 @@ func (t sparseListValue) InsertAt(key int, value Value) List {
 		return t[i].Key() >= key
 	})
 	if i == n {
-		return t.append(n, Item(key, value))
+		return t.append(n, MutableItem(key, value))
 	} else {
-		return t.insertAt(i, n, Item(key, value))
+		return t.insertAt(i, n, MutableItem(key, value))
 	}
 }
 
@@ -434,7 +410,7 @@ func (t sparseListValue) InsertAll(key int, list []Value) List {
 
 	var slice []ListItem
 	for _, value := range list {
-		slice = append(slice, &sparseListItem{key, value})
+		slice = append(slice, &mutableListItem{key, value})
 	}
 
 	n := len(t)

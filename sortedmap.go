@@ -19,43 +19,37 @@ import (
 	Serializes in MessagePack as Map with string index
 */
 
-type sortedMapEntry struct {
-	key    string
-	value  Value
-}
-
 type sortedMapValue []MapEntry
+
 var sortedMapValueClass = reflect.TypeOf((*sortedMapValue)(nil)).Elem()
 
-func Entry(key string, value Value) MapEntry {
-	return &sortedMapEntry {
-		key: key,
-		value: value,
-	}
-}
-
-func NewMap() Map {
+func EmptyMutableMap() Map {
 	return sortedMapValue([]MapEntry{})
 }
 
-func SortedMap(entries []MapEntry, sortedEntries bool) Map {
+func SortedMapOf(src map[string]Value) Map {
+	entries := make([]MapEntry, len(src))
+	var i int
+	for key, value := range src {
+		entries[i] = MutableEntry(key, value)
+		i++
+	}
 	t := sortedMapValue(entries)
-	if !sortedEntries {
+	sort.Sort(t)
+	return t
+}
+
+func SortedMap(entries []MapEntry, sorted bool) Map {
+	t := sortedMapValue(entries)
+	if !sorted {
 		sort.Sort(t)
 	}
 	return t
 }
 
-func (t *sortedMapEntry) Key() string {
-	return t.key
-}
-
-func (t *sortedMapEntry) Value() Value {
-	return t.value
-}
-
-func (t *sortedMapEntry) Equal(e MapEntry) bool {
-	return t.key == e.Key() && Equal(t.value, e.Value())
+func SortedMapCopyOf(other Map) Map {
+	t := sortedMapValue(mapEntryCopyOf(other.Entries()))
+	return t
 }
 
 func (t sortedMapValue) HashMap() map[string]Value {
@@ -239,10 +233,10 @@ func (t sortedMapValue) GetList(key string) List {
 		case LIST:
 			return value.(List)
 		case MAP:
-			return SolidList(value.(Map).Values())
+			return MutableList(value.(Map).Values())
 		}
 	}
-	return EmptyList()
+	return EmptyImmutableList()
 }
 
 func (t sortedMapValue) GetMap(key string) Map {
@@ -255,7 +249,7 @@ func (t sortedMapValue) GetMap(key string) Map {
 			return value.(Map)
 		}
 	}
-	return EmptyMap()
+	return EmptyImmutableMap()
 }
 
 func (t sortedMapValue) Insert(key string, value Value) Map {
@@ -267,9 +261,9 @@ func (t sortedMapValue) Insert(key string, value Value) Map {
 		return t[i].Key() >= key
 	})
 	if i == n {
-		return t.append(n, Entry(key, value))
+		return t.append(n, MutableEntry(key, value))
 	} else {
-		return t.insertAt(i, n, Entry(key, value))
+		return t.insertAt(i, n, MutableEntry(key, value))
 	}
 }
 
@@ -282,11 +276,23 @@ func (t sortedMapValue) Put(key string, value Value) Map {
 		return t[i].Key() >= key
 	})
 	if i == n {
-		return t.append(n, Entry(key, value))
+		return t.append(n, MutableEntry(key, value))
 	} else if t[i].Key() == key {
-		return t.replaceAt(i, n, Entry(key, value))
+		return t.replaceAt(i, n, MutableEntry(key, value))
 	} else {
-		return t.insertAt(i, n, Entry(key, value))
+		return t.insertAt(i, n, MutableEntry(key, value))
+	}
+}
+
+func (t sortedMapValue) Update(key string, updater Updater) bool {
+	n := len(t)
+	i := sort.Search(n, func(i int) bool {
+		return t[i].Key() >= key
+	})
+	if i >= 0 && i < n && t[i].Key() == key {
+		return t[i].Update(updater)
+	} else {
+		return false
 	}
 }
 
@@ -372,7 +378,7 @@ func (t sortedMapValue) InsertAll(key string, list []Value) Map {
 
 	var slice []MapEntry
 	for _, value := range list {
-		slice = append(slice, &sortedMapEntry{key, value})
+		slice = append(slice, &mutableMapEntry{key, value})
 	}
 
 	n := len(t)
@@ -431,3 +437,4 @@ func (t sortedMapValue) removeSliceAt(i, cnt, n int) Map {
 		return append(t[:i], t[i+cnt:]...)
 	}
 }
+

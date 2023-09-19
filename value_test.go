@@ -143,7 +143,7 @@ func TestPackNil(t *testing.T) {
 
 	actual, err := val.Unpack(data, false)
 	require.Nil(t, err)
-	require.Nil(t, actual)
+	require.Equal(t, val.Null, actual)
 
 
 }

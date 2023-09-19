@@ -65,7 +65,7 @@ func ParseNumber(str string) Number {
 		return Long(0)
 	}
 
-	if str == "null" {
+	if str == "null" || str == "nan" {
 		return Nan()
 	}
 

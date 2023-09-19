@@ -16,8 +16,6 @@ import (
 	"strings"
 )
 
-
-
 func Pack(val Value) ([]byte, error) {
 	buf := bytes.Buffer{}
 	p := MessagePacker(&buf)
@@ -62,12 +60,15 @@ func Jsonify(val Value) string {
 	return out.String()
 }
 
-func Hash(val Value, hash crypto.Hash) ([]byte, error) {
+// return data, hash, error
+func Hash(val Value, hash crypto.Hash) ([]byte, []byte, error) {
 	data, err := Pack(val)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return hash.New().Sum(data), nil
+	h := hash.New()
+	h.Write(data)
+	return data, h.Sum(nil), nil
 }
 
 // use box.GenerateKey(rand.Reader) to get keys

@@ -16,7 +16,7 @@ import (
 func TestNilSparseList(t *testing.T) {
 
 	b := val.EmptySparseList()
-	b = b.Append(nil)
+	b = b.Append(val.Null)
 
 	data, err := val.Pack(b)
 	require.Nil(t, err)

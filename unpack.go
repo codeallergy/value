@@ -23,7 +23,7 @@ func doParse(unpacker Unpacker, parser Parser) (Value, error) {
 	case UnexpectedEOF:
 		return nil, io.ErrUnexpectedEOF
 	case NilToken:
-		return nil, nil
+		return Null, nil
 	case BoolToken:
 		return Boolean(parser.ParseBool(header)), parser.Error()
 	case LongToken:

@@ -15,7 +15,7 @@ import (
 func TestNilSolidList(t *testing.T) {
 
 	b := val.EmptyList()
-	b = b.Append(nil)
+	b = b.Append(val.Null)
 
 	data, err := val.Pack(b)
 	require.Nil(t, err)

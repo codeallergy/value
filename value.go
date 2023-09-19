@@ -26,6 +26,7 @@ type Kind int
 
 const (
 	INVALID Kind = iota
+	NULL
 	BOOL
 	NUMBER
 	STRING

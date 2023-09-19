@@ -17,7 +17,7 @@ import (
 func TestNilSortedMap(t *testing.T) {
 
 	b := val.EmptyMap()
-	b = b.Put("null", nil)
+	b = b.Put("null", val.Null)
 
 	data, err := val.Pack(b)
 	require.Nil(t, err)

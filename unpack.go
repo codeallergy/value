@@ -173,7 +173,7 @@ func doParseMap(header []byte, unpacker Unpacker, parser Parser) (Value, error) 
 	if mayBeList {
 		return SparseList(sparseListItems, sorted), nil
 	} else {
-		return SortedMap(sortedMapEntries, sorted), nil
+		return ImmutableMap(sortedMapEntries, sorted), nil
 	}
 
 }
